@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.DS_Store
+.ipynb_checkpoints/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+coverage/
+client/node_modules/
+client/dist/
+server/node_modules/
