@@ -1,7 +1,19 @@
 const toneOptions = [
-  { label: "Professional", value: "professional" },
-  { label: "Friendly", value: "friendly" },
-  { label: "Casual", value: "casual" }
+  {
+    label: "Professional",
+    value: "professional",
+    description: "Clean, polished, and business-ready wording."
+  },
+  {
+    label: "Friendly",
+    value: "friendly",
+    description: "Warm, approachable language with a human touch."
+  },
+  {
+    label: "Casual",
+    value: "casual",
+    description: "Relaxed, conversational phrasing for everyday writing."
+  }
 ];
 
 function ControlsPanel({
@@ -29,6 +41,9 @@ function ControlsPanel({
             </option>
           ))}
         </select>
+        <p className="text-xs leading-6 text-slate-400">
+          {toneOptions.find((option) => option.value === tone)?.description}
+        </p>
       </div>
 
       <div className="space-y-3">

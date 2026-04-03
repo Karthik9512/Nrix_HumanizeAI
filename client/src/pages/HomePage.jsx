@@ -123,12 +123,12 @@ function HomePage() {
                 HumanizeAI
               </div>
               <h1 className="max-w-2xl font-display text-4xl leading-tight text-white sm:text-5xl">
-                Make AI-generated writing feel naturally human.
+                Turn AI-written drafts into clear, natural, publication-ready writing.
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-8 text-slate-300">
-                Restructure sentences, soften robotic phrasing, and adapt tone
-                with a workflow built for creators, marketers, and product
-                teams.
+                Rewrite robotic content with stronger flow, better readability,
+                and tone control designed for creators, teams, and client-ready
+                communication.
               </p>
             </div>
             <button
@@ -147,7 +147,7 @@ function HomePage() {
                 Sentence flow
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-200">
-                Reorders stiff constructions into smoother, more conversational
+                Reworks stiff phrasing into smoother, more natural sentence
                 structure.
               </p>
             </div>
@@ -156,8 +156,8 @@ function HomePage() {
                 Tone control
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-200">
-                Switch between professional, friendly, and casual output in one
-                click.
+                Choose between professional, friendly, and casual output with
+                more visible tonal differences.
               </p>
             </div>
             <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
@@ -165,8 +165,8 @@ function HomePage() {
                 Creativity dial
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-200">
-                Balance faithful edits with bolder rewrites depending on your
-                goal.
+                Control how closely the rewrite follows the source versus how
+                boldly it rephrases.
               </p>
             </div>
           </div>

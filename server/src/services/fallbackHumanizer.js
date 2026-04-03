@@ -60,15 +60,42 @@ const transitionByTone = {
 const toneRules = {
   professional: {
     trimWords: ["really", "very", "quite"],
-    allowContractions: false
+    allowContractions: false,
+    intro: "",
+    closer: "",
+    lexicalPairs: [
+      [/\bhelp\b/gi, "support"],
+      [/\bshow\b/gi, "demonstrate"],
+      [/\bget\b/gi, "achieve"],
+      [/\bmake sure\b/gi, "ensure"],
+      [/\bway easier\b/gi, "more efficient"]
+    ]
   },
   friendly: {
     trimWords: ["very"],
-    allowContractions: true
+    allowContractions: true,
+    intro: "",
+    closer: " It feels clearer and more approachable.",
+    lexicalPairs: [
+      [/\busers\b/gi, "people"],
+      [/\butilize\b/gi, "use"],
+      [/\bhelp\b/gi, "help"],
+      [/\bimprove\b/gi, "make better"],
+      [/\boptimize\b/gi, "make smoother"]
+    ]
   },
   casual: {
     trimWords: ["very", "quite"],
-    allowContractions: true
+    allowContractions: true,
+    intro: "",
+    closer: " It sounds more natural and less stiff.",
+    lexicalPairs: [
+      [/\butilize\b/gi, "use"],
+      [/\bimprove\b/gi, "make better"],
+      [/\bapproximately\b/gi, "about"],
+      [/\btherefore\b/gi, "so"],
+      [/\bhowever\b/gi, "but"]
+    ]
   }
 };
 
@@ -137,6 +164,24 @@ const applyContractions = (sentence, tone) => {
   (contractions[tone] || []).forEach(([pattern, replacement]) => {
     revised = revised.replace(pattern, replacement);
   });
+
+  return revised;
+};
+
+const applyToneLexicon = (sentence, tone) => {
+  let revised = sentence;
+
+  toneRules[tone].lexicalPairs.forEach(([pattern, replacement]) => {
+    revised = revised.replace(pattern, replacement);
+  });
+
+  if (tone === "professional") {
+    revised = revised
+      .replace(/\bdon't\b/gi, "do not")
+      .replace(/\bcan't\b/gi, "cannot")
+      .replace(/\bit's\b/gi, "it is")
+      .replace(/\bthat's\b/gi, "that is");
+  }
 
   return revised;
 };
@@ -234,6 +279,7 @@ const rewriteSentence = (sentence, tone, creativity, index) => {
   revised = rewriteLongSentence(revised, tone, creativity);
   revised = diversifyStructure(revised, tone, creativity, index);
   revised = applyContractions(revised, tone);
+  revised = applyToneLexicon(revised, tone);
   revised = softenEnding(revised, tone, creativity);
   revised = revised.replace(/\s{2,}/g, " ").replace(/\s+([,.!?])/g, "$1").trim();
 
@@ -274,5 +320,7 @@ export const humanizeWithFallback = ({ text, tone, creativity }) => {
     return { text: candidateText, score: scoreCandidate(candidateText, normalizedInput) };
   });
 
-  return candidates.sort((left, right) => right.score - left.score)[0].text;
+  const best = candidates.sort((left, right) => right.score - left.score)[0].text;
+  const closer = creativity >= 6 ? toneRules[tone].closer : "";
+  return `${toneRules[tone].intro}${best}${closer}`.trim();
 };

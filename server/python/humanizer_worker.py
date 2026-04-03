@@ -96,9 +96,24 @@ def generate_paraphrase(text: str, tone: str, creativity: int) -> str:
     best = pick_best_candidate(text, decoded)
 
     if tone == "friendly":
-        best = best.replace(" It ", " It also ")
+        best = (
+            best.replace(" It ", " It also ")
+            .replace("utilize", "use")
+            .replace("improve", "make better")
+        )
     elif tone == "casual":
-        best = best.replace("do not", "don't").replace("cannot", "can't")
+        best = (
+            best.replace("do not", "don't")
+            .replace("cannot", "can't")
+            .replace("utilize", "use")
+            .replace("therefore", "so")
+        )
+    else:
+        best = (
+            best.replace(" don't ", " do not ")
+            .replace(" can't ", " cannot ")
+            .replace(" use ", " leverage ")
+        )
 
     return normalize_whitespace(best)
 
