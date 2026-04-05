@@ -1,41 +1,41 @@
-function TextInputPanel({
-  value,
-  onChange,
-  onSubmit,
-  loading,
-  characterCount
-}) {
+import { FileText, Type } from "lucide-react";
+
+function TextInputPanel({ value, onChange, onSubmit, loading, characterCount }) {
   return (
-    <div className="glass-panel flex h-full flex-col p-6">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div>
-          <p className="font-display text-2xl text-white">
+    <div className="editor-pane flex h-full flex-col overflow-hidden rounded-2xl border shadow-sm">
+      <div className="flex items-center justify-between border-b border-inherit px-6 py-4">
+        <div className="flex items-center gap-2">
+          <FileText size={18} className="text-slate-400" />
+          <h2 className="font-display text-sm font-semibold tracking-wide">
             Source Text
-          </p>
-          <p className="mt-1 text-sm text-slate-400">
-            Paste AI-generated text and we will make it sound more natural.
-          </p>
+          </h2>
         </div>
-        <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">
-          {characterCount} chars
-        </span>
+        <div className="flex items-center gap-4">
+          <span className="text-xs font-medium text-slate-400">
+            {characterCount} chars
+          </span>
+        </div>
       </div>
 
-      <textarea
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder="Enter text to humanize..."
-        className="min-h-[280px] flex-1 rounded-3xl border border-white/10 bg-slate-950/70 px-5 py-4 text-sm leading-7 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-accent-400"
-      />
+      <div className="relative flex-1 p-6">
+        <textarea
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder="Paste AI-generated text here to make it sound human..."
+          className="h-full w-full resize-none border-none bg-transparent text-base leading-relaxed text-slate-800 outline-none placeholder:text-slate-400 dark:text-slate-200"
+        />
+      </div>
 
-      <button
-        type="button"
-        onClick={onSubmit}
-        disabled={loading}
-        className="mt-5 inline-flex items-center justify-center rounded-2xl bg-accent-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        {loading ? "Humanizing..." : "Humanize"}
-      </button>
+      <div className="border-t border-inherit bg-surface-50 px-6 py-4 dark:bg-[#11131a]">
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={loading || !value.trim()}
+          className="btn-primary w-full shadow-glow-cyan transition-shadow hover:shadow-glow-lg sm:w-auto sm:px-8"
+        >
+          {loading ? "Processing..." : "Humanize Text"}
+        </button>
+      </div>
     </div>
   );
 }

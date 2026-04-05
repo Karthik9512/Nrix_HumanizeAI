@@ -2,67 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: dark;
+@layer base {
+  body {
+    @apply min-h-screen bg-surface-50 font-body text-slate-800 antialiased transition-colors duration-300;
+  }
+  
+  .dark body {
+    @apply bg-[#0b0e14] text-slate-200;
+  }
 }
 
-body {
-  @apply min-h-screen bg-slate-950 font-body text-slate-100 antialiased;
-  background-image:
-    radial-gradient(circle at top left, rgba(59, 130, 246, 0.22), transparent 34%),
-    radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.18), transparent 28%),
-    linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 1));
-}
+@layer components {
+  .editor-pane {
+    @apply border-slate-200 bg-white transition-colors duration-300;
+  }
 
-body.light {
-  @apply bg-slate-50 text-slate-900;
-  background-image:
-    radial-gradient(circle at top left, rgba(191, 219, 254, 0.85), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(125, 211, 252, 0.55), transparent 24%),
-    linear-gradient(135deg, rgba(248, 250, 252, 1), rgba(226, 232, 240, 1));
-}
+  .dark .editor-pane {
+    @apply border-white/5 bg-[#151821];
+  }
 
-#root {
-  @apply min-h-screen;
-}
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  }
 
-.glass-panel {
-  @apply rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl;
-}
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-surface-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  }
 
-body.light .glass-panel {
-  @apply border-slate-200 bg-white/80;
-}
+  .dark .btn-secondary {
+    @apply border-white/10 bg-[#1c202a] text-slate-300 hover:bg-[#252a36];
+  }
 
-body.light .text-white,
-body.light .text-slate-100,
-body.light .text-slate-200 {
-  color: rgb(15 23 42);
-}
-
-body.light .text-slate-300,
-body.light .text-slate-400 {
-  color: rgb(71 85 105);
-}
-
-body.light .text-slate-500 {
-  color: rgb(100 116 139);
-}
-
-body.light .border-white\/10 {
-  border-color: rgb(203 213 225 / 0.9);
-}
-
-body.light .bg-white\/5,
-body.light .bg-white\/10 {
-  background-color: rgb(248 250 252 / 0.92);
-}
-
-body.light .bg-slate-950\/70,
-body.light .bg-slate-900\/70 {
-  background-color: rgb(255 255 255 / 0.95);
-}
-
-.slider {
-  accent-color: #3b82f6;
+  .slider {
+    accent-color: #6366f1;
+  }
 }

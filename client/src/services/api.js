@@ -1,36 +1,27 @@
-import axios from "axios";
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const humanizeText = async (payload) => {
-  const { data } = await api.post("/humanize", {
-    text: payload.text,
-    tone: payload.tone,
-    mode: payload.mode || "humanize",
-    creativity: payload.creativity,
+  const response = await fetch(`${API_BASE}/humanize`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
   });
-  return data;
-};
 
-export const saveConversion = async (payload) => {
-  const { data } = await api.post("/save", {
-    originalText: payload.originalText,
-    humanizedText: payload.humanizedText,
-    tone: payload.tone,
-    mode: payload.mode || "humanize",
-    creativity: payload.creativity,
-  });
-  return data;
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'API error');
+  }
+
+  const data = await response.json();
+  return data.data || data;
 };
 
 export const fetchHistory = async () => {
-  const { data } = await api.get("/history");
-  return data;
+  const response = await fetch(`${API_BASE}/history`);
+  if (!response.ok) throw new Error('Failed to fetch history');
+  return response.json();
 };
 
-export default api;
+export default {};

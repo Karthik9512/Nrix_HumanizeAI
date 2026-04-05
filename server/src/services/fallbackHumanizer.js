@@ -722,8 +722,12 @@ export const humanizeWithFallback = ({ text, tone, mode = "humanize", creativity
     };
   });
 
-  const best = candidates.sort((a, b) => b.score - a.score)[0].text;
+  const sortedCandidates = candidates.sort((a, b) => b.score - a.score);
+  const best = sortedCandidates[0].text;
+  
+  // Return up to 3 diverse variants
+  const variants = sortedCandidates.slice(0, 3).map(c => c.text);
   const readability = computeReadability(best);
 
-  return { humanizedText: best, readability };
+  return { humanizedText: variants, readability };
 };

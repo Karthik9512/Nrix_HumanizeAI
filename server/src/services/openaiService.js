@@ -48,6 +48,13 @@ const applyFinalTonePass = (text, tone) => {
   return revised;
 };
 
+const applyFinalTonePassArray = (texts, tone) => {
+  if (Array.isArray(texts)) {
+    return texts.map(text => applyFinalTonePass(text, tone));
+  }
+  return applyFinalTonePass(texts, tone);
+};
+
 /**
  * Main humanization entrypoint.
  * @param {object} params
@@ -69,10 +76,10 @@ export const generateHumanizedText = async ({ text, tone, mode = "humanize", cre
         creativity,
       });
 
-      if (result?.humanizedText?.trim()) {
+      if (result?.humanizedText) {
         // The Python pipeline already does full processing,
         // just apply a light final tone pass
-        const finalText = applyFinalTonePass(result.humanizedText.trim(), tone);
+        const finalText = applyFinalTonePassArray(result.humanizedText, tone);
 
         return {
           humanizedText: finalText,
@@ -89,7 +96,7 @@ export const generateHumanizedText = async ({ text, tone, mode = "humanize", cre
       const fallbackResult = humanizeWithFallback({ text, tone, mode, creativity });
 
       return {
-        humanizedText: applyFinalTonePass(fallbackResult.humanizedText, tone),
+        humanizedText: applyFinalTonePassArray(fallbackResult.humanizedText, tone),
         provider: "local-rule-engine",
         readability: fallbackResult.readability || null,
         fallbackReason: error.message,
@@ -101,7 +108,7 @@ export const generateHumanizedText = async ({ text, tone, mode = "humanize", cre
   const fallbackResult = humanizeWithFallback({ text, tone, mode, creativity });
 
   return {
-    humanizedText: applyFinalTonePass(fallbackResult.humanizedText, tone),
+    humanizedText: applyFinalTonePassArray(fallbackResult.humanizedText, tone),
     provider: "local-rule-engine",
     readability: fallbackResult.readability || null,
   };

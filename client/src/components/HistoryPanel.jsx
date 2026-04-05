@@ -32,10 +32,10 @@ function HistoryPanel({ history, onSelect }) {
                 </span>
               </div>
               <p className="text-sm leading-6 text-slate-200">
-                {item.originalText}
+                {item.inputText}
               </p>
               <p className="mt-3 text-xs leading-6 text-slate-400">
-                {item.humanizedText}
+                {item.outputText}
               </p>
             </button>
           ))}

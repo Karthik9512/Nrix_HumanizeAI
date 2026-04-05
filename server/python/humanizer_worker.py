@@ -18,9 +18,9 @@ import sys
 from functools import lru_cache
 
 # ---------------------------------------------------------------------------
-# NLTK bootstrap (download data on first run, silently)
+# NLP bootstrap (download data on first run, silently)
 # ---------------------------------------------------------------------------
-def _ensure_nltk_data():
+def _ensure_nlp_data():
     import nltk
     for pkg in ("punkt", "punkt_tab", "averaged_perceptron_tagger",
                 "averaged_perceptron_tagger_eng", "wordnet", "omw-1.4"):
@@ -30,12 +30,26 @@ def _ensure_nltk_data():
                            else f"corpora/{pkg}")
         except LookupError:
             nltk.download(pkg, quiet=True)
+    
+    try:
+        import spacy
+        if not spacy.util.is_package("en_core_web_sm"):
+            import subprocess
+            subprocess.run([sys.executable, "-m", "spacy", "download", "en_core_web_sm"], check=True)
+    except ImportError:
+        pass
 
-_ensure_nltk_data()
+_ensure_nlp_data()
 
 import nltk
 from nltk.corpus import wordnet
 from nltk.tokenize import sent_tokenize, word_tokenize
+
+try:
+    import spacy
+    nlp = spacy.load("en_core_web_sm")
+except (ImportError, Exception):
+    nlp = None
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -277,8 +291,25 @@ def synonym_replace_sentence(sentence: str, replace_prob: float = 0.18) -> str:
 
 
 def restructure_sentence(sentence: str) -> str:
-    """Occasional restructuring: move prepositional phrases, etc."""
-    # Move trailing "because/since" clause to the front ~35% of the time
+    """Occasional restructuring: move prepositional phrases, invert clauses."""
+    # Use spaCy for dependency-based restructuring if available
+    if nlp and len(sentence) > 40 and random.random() < 0.4:
+        doc = nlp(sentence)
+        clauses = [sent for sent in doc.sents]
+        if clauses:
+            # Look for ADVCL (adverbial clause modifier) attached to main root
+            for token in doc:
+                if token.dep_ == "advcl" and token.head.dep_ == "ROOT":
+                    # If the advcl is at the end, try to move it to the front
+                    subtree = list(token.subtree)
+                    start_idx = min(t.i for t in subtree)
+                    if start_idx > doc[len(doc)//2].i:
+                        advcl_text = "".join(t.text_with_ws for t in subtree).strip()
+                        main_text = "".join(t.text_with_ws for t in doc if t not in subtree).strip()
+                        main_text = main_text.rstrip(",.")
+                        return f"{advcl_text.capitalize()}, {main_text[0].lower()}{main_text[1:]}."
+    
+    # Fallback to regex-based heuristics
     m = re.match(r"^(.+?)\s+(because|since|as)\s+(.+)$", sentence, re.I)
     if m and random.random() < 0.35:
         main, conj, reason = m.groups()
@@ -286,7 +317,6 @@ def restructure_sentence(sentence: str) -> str:
         reason = reason.rstrip(".")
         return f"{conj.capitalize()} {reason}, {main[0].lower()}{main[1:]}."
 
-    # Split long comma-separated clauses into two sentences ~25% of the time
     if sentence.count(",") >= 2 and len(sentence) > 100 and random.random() < 0.25:
         parts = sentence.rstrip(".").split(", ", 1)
         if len(parts) == 2 and len(parts[1]) > 30:
@@ -558,91 +588,63 @@ def quality_score(source: str, candidate: str) -> float:
 # ---------------------------------------------------------------------------
 # Main Pipeline — Orchestrate All Stages
 # ---------------------------------------------------------------------------
-def humanize_text(text: str, tone: str = "professional",
-                  mode: str = "humanize", creativity: int = 5) -> dict:
-    """
-    Full 6-stage humanization pipeline.
-    Returns dict with humanizedText, provider, and readability metrics.
-    """
-    # --- Stage 1: Preprocess ---
+def run_pipeline(text, tone, mode, creativity):
     paragraphs = preprocess(text)
-
-    # --- Stage 2 & 3 & 4 & 5: Per-sentence processing ---
     processed_paragraphs = []
-
     for para_sentences in paragraphs:
         rewritten_sentences = []
-
         for sentence in para_sentences:
             sentence = normalize_whitespace(sentence)
             if len(sentence) < 5:
                 rewritten_sentences.append(sentence)
                 continue
-
-            # Stage 2: Paraphrase with transformer
             try:
                 candidates = paraphrase_sentence(sentence, creativity, num_candidates=4)
+                # Randomly pick from top 2 to create variations across runs
                 best = pick_best_paraphrase(sentence, candidates)
             except Exception:
                 best = sentence
 
-            # Stage 3: NLP Enhancement
             replace_prob = 0.10 + (creativity / 100)
             best = synonym_replace_sentence(best, replace_prob=replace_prob)
-
             if creativity >= 4:
                 best = restructure_sentence(best)
-
-            # Stage 3b: Remove AI-tell words
             best = remove_ai_giveaways(best)
-
-            # Stage 4: Tone & Mode
             best = apply_tone(best, tone, mode)
-
-            # Ensure proper punctuation
             best = best.strip()
             if best and not best[-1] in ".!?":
                 best += "."
             if best:
                 best = best[0].upper() + best[1:]
-
             rewritten_sentences.append(best)
 
-        # Stage 5: Anti-detection (paragraph-level transforms)
         rewritten_sentences = add_burstiness(rewritten_sentences)
         rewritten_sentences = vary_connectors(rewritten_sentences)
-
         if mode in ("humanize", "casual") or tone in ("casual", "friendly"):
-            rewritten_sentences = insert_natural_fillers(
-                rewritten_sentences, mode,
-                prob=0.06 + (creativity / 200)
-            )
-
+            rewritten_sentences = insert_natural_fillers(rewritten_sentences, mode, prob=0.06 + (creativity / 200))
         if mode == "academic":
             rewritten_sentences = add_academic_hedging(rewritten_sentences)
-
-        # Mode-specific: Expand mode adds elaboration phrases
         if mode == "expand":
             rewritten_sentences = _expand_sentences(rewritten_sentences)
-
-        # Mode-specific: Simplify shortens sentences
         if mode == "simplify":
             rewritten_sentences = _simplify_sentences(rewritten_sentences)
 
         processed_paragraphs.append(" ".join(rewritten_sentences))
 
-    # --- Stage 6: Quality scoring ---
     final_text = "\n\n".join(processed_paragraphs)
-
-    # Remove double spaces & clean up
     final_text = re.sub(r"  +", " ", final_text).strip()
-    final_text = re.sub(r"\s+([,.!?;:])", r"\1", final_text)
+    return re.sub(r"\s+([,.!?;:])", r"\1", final_text)
 
-    metrics = compute_readability(final_text)
+def humanize_text(text: str, tone: str = "professional", mode: str = "humanize", creativity: int = 5) -> dict:
+    # Generate 2 distinct variants
+    v1 = run_pipeline(text, tone, mode, max(1, creativity - 1))
+    v2 = run_pipeline(text, tone, mode, min(10, creativity + 1))
 
+    metrics = compute_readability(v1)
+    
     return {
         "success": True,
-        "humanizedText": final_text,
+        "humanizedText": [v1, v2],
         "provider": "local-transformer",
         "readability": metrics,
     }

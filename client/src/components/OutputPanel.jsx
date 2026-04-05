@@ -1,24 +1,15 @@
-import { Check, Copy, Save } from "lucide-react";
+import { Check, Copy, Settings2, Sparkles, Wand2 } from "lucide-react";
 import Loader from "./Loader";
 
-function OutputPanel({
-  output,
-  loading,
-  onCopy,
-  onSave,
-  copied,
-  saveDisabled
-}) {
+function OutputPanel({ output, loading, onCopy, copied, saveDisabled }) {
   return (
-    <div className="glass-panel flex h-full flex-col p-6">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div>
-          <p className="font-display text-2xl text-white">
-            Humanized Output
-          </p>
-          <p className="mt-1 text-sm text-slate-400">
-            Your rewritten text appears here after processing.
-          </p>
+    <div className="editor-pane flex h-full flex-col overflow-hidden rounded-2xl border shadow-sm">
+      <div className="flex items-center justify-between border-b border-inherit px-6 py-4">
+        <div className="flex items-center gap-2">
+          <Sparkles size={18} className="text-accent-500" />
+          <h2 className="font-display text-sm font-semibold tracking-wide">
+            Humanized Result
+          </h2>
         </div>
 
         <div className="flex items-center gap-2">
@@ -26,34 +17,30 @@ function OutputPanel({
             type="button"
             onClick={onCopy}
             disabled={!output}
-            className="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-2 text-sm text-slate-200 transition hover:border-accent-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-secondary flex items-center gap-2 px-3 py-1.5 text-xs"
           >
-            {copied ? <Check size={16} /> : <Copy size={16} />}
+            {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
             {copied ? "Copied" : "Copy"}
-          </button>
-          <button
-            type="button"
-            onClick={onSave}
-            disabled={saveDisabled}
-            className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-sm text-slate-100 transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Save size={16} />
-            Save
           </button>
         </div>
       </div>
 
-      <div className="flex min-h-[280px] flex-1 rounded-3xl border border-white/10 bg-slate-950/70 p-5">
+      <div className="relative flex-1 p-6">
         {loading ? (
-          <Loader />
+          <div className="flex h-full w-full items-center justify-center opacity-50">
+            <Loader />
+          </div>
         ) : output ? (
-          <p className="whitespace-pre-wrap text-sm leading-7 text-slate-100">
+          <div className="animate-fade-in text-base leading-relaxed text-slate-700 dark:text-slate-300">
             {output}
-          </p>
+          </div>
         ) : (
-          <p className="text-sm leading-7 text-slate-500">
-            Nothing here yet. Humanize a piece of text to see the result.
-          </p>
+          <div className="flex h-full flex-col items-center justify-center gap-4 text-slate-400 dark:text-slate-500">
+            <Wand2 size={40} className="opacity-20" />
+            <p className="max-w-[250px] text-center text-sm leading-relaxed">
+              Click Humanize to see your rewritten text appear here.
+            </p>
+          </div>
         )}
       </div>
     </div>
