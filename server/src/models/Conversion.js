@@ -5,27 +5,32 @@ const conversionSchema = new mongoose.Schema(
     originalText: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     humanizedText: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     tone: {
       type: String,
       enum: ["casual", "professional", "friendly"],
-      required: true
+      required: true,
+    },
+    mode: {
+      type: String,
+      enum: ["humanize", "formal", "simplify", "expand", "academic"],
+      default: "humanize",
     },
     creativity: {
       type: Number,
       min: 1,
       max: 10,
-      required: true
-    }
+      required: true,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

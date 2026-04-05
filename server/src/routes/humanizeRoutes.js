@@ -17,9 +17,15 @@ router.post(
     body("tone")
       .isIn(["casual", "professional", "friendly"])
       .withMessage("Tone must be casual, professional, or friendly."),
+    body("mode")
+      .optional()
+      .isIn(["humanize", "formal", "simplify", "expand", "academic"])
+      .withMessage(
+        "Mode must be humanize, formal, simplify, expand, or academic."
+      ),
     body("creativity")
       .isInt({ min: 1, max: 10 })
-      .withMessage("Creativity must be an integer between 1 and 10.")
+      .withMessage("Creativity must be an integer between 1 and 10."),
   ],
   validateRequest,
   humanizeText
